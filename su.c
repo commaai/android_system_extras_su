@@ -305,6 +305,14 @@ int access_disabled(const struct su_initiator *from) {
             return 1;
         }
 
+        data = read_file("/system/build.prop");
+        if (data != NULL) {
+            get_property(data, enabled, "persist.sys.root_access", "0");
+            free(data);
+        } else {
+            memcpy(enabled, "0", 2);
+        }
+
         data = read_file("/data/property/persist.sys.root_access");
         if (data != NULL) {
             len = strlen(data);
@@ -313,8 +321,7 @@ int access_disabled(const struct su_initiator *from) {
             else
                 memcpy(enabled, data, len + 1);
             free(data);
-        } else
-            memcpy(enabled, "0", 2);
+        }
 
         /* enforce persist.sys.root_access on non-eng builds for apps */
         if (strcmp("eng", build_type) != 0 &&
